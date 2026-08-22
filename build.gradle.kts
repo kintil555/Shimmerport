@@ -16,6 +16,7 @@ repositories {
         name = "Modrinth"
         content { includeGroup("maven.modrinth") }
     }
+    maven("https://maven.shedaniel.me/") { name = "Shedaniel" } // Cloth Config
     maven("https://jitpack.io")
 }
 
