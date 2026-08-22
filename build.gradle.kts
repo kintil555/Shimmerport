@@ -16,7 +16,6 @@ repositories {
         name = "Modrinth"
         content { includeGroup("maven.modrinth") }
     }
-    maven("https://maven.shedaniel.me/") { name = "Shedaniel" } // Cloth Config
     maven("https://jitpack.io")
 }
 
@@ -40,8 +39,10 @@ dependencies {
     implementation("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
     api("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
 
-    api("me.shedaniel.cloth:cloth-config-fabric:${property("cloth_config_version")}")
-    include("me.shedaniel.cloth:cloth-config-fabric:${property("cloth_config_version")}")
+    api("maven.modrinth:cloth-config:${property("cloth_config_version")}") {
+        exclude(group = "net.fabricmc.fabric-api")
+    }
+    include("maven.modrinth:cloth-config:${property("cloth_config_version")}")
 
     implementation("maven.modrinth:sodium:${property("sodium_version")}") {
         exclude(group = "net.fabricmc.fabric-api")
