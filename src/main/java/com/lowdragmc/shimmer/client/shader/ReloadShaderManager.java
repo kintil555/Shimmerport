@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.client.renderer.GameRenderer;
@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.*;
 import net.minecraft.util.GsonHelper;
@@ -33,13 +33,13 @@ import java.util.stream.Stream;
 
 public class ReloadShaderManager {
 
-    private static Map<ResourceLocation, Resource> reloadResources = new HashMap<>();
+    private static Map<Identifier, Resource> reloadResources = new HashMap<>();
     public static boolean isReloading = false;
     private static boolean foreReloadAll = false;
     private static final ResourceProvider reloadShaderResource = (res) -> Optional.of(reloadResources.get(res));
     public static PreparableReloadListener shaderReloader;
 
-    private static void recordResource(ResourceLocation resourceLocation, Resource resource) {
+    private static void recordResource(Identifier resourceLocation, Resource resource) {
         reloadResources.put(resourceLocation, resource);
     }
 
@@ -48,7 +48,7 @@ public class ReloadShaderManager {
         reloadResources.clear();
     }
 
-    private static void recordCopyResource(ResourceLocation resourceLocation, Resource resource) {
+    private static void recordCopyResource(Identifier resourceLocation, Resource resource) {
         try(var res = resource.open()) {
             final byte[] data = res.readAllBytes();
             final IoSupplier<InputStream> ioSupplier = () -> new ByteArrayInputStream(data);
@@ -68,7 +68,7 @@ public class ReloadShaderManager {
         Executor gameExecutor = Minecraft.getInstance();
         message(Component.literal("start reloading shader"));
         long time = System.currentTimeMillis();
-        Map<ResourceLocation, Resource> backupResource = reloadResources;
+        Map<Identifier, Resource> backupResource = reloadResources;
         reloadResources = new HashMap<>();
         isReloading = true;
         foreReloadAll = false;
@@ -112,25 +112,25 @@ public class ReloadShaderManager {
             return new ShaderInstance(reloadShaderResource, shaderName, vertexFormat);
         }
         ShaderInstance shaderInstance = new ShaderInstance(resourceProvider, shaderName, vertexFormat);
-        ResourceLocation shaderResourceLocation = new ResourceLocation(shaderName);
+        Identifier shaderResourceLocation = new Identifier(shaderName);
         recordProgramResource(resourceProvider, shaderResourceLocation.getNamespace(), shaderResourceLocation.getPath());
         return shaderInstance;
     }
 
-    public static ShaderInstance backupNewShaderInstance(ResourceProvider resourceProvider, ResourceLocation shaderLocation, VertexFormat vertexFormat) throws IOException {
+    public static ShaderInstance backupNewShaderInstance(ResourceProvider resourceProvider, Identifier shaderLocation, VertexFormat vertexFormat) throws IOException {
         return backupNewShaderInstance(resourceProvider, shaderLocation.toString(), vertexFormat);
     }
 
     private static void recordProgramResource(ResourceProvider resourceProvider, String nameSpace, String shaderName) throws IOException {
-        ResourceLocation programResourceLocation = new ResourceLocation(nameSpace, "shaders/core/" + shaderName + ".json");
+        Identifier programResourceLocation = new Identifier(nameSpace, "shaders/core/" + shaderName + ".json");
         Resource programResource = resourceProvider.getResource(programResourceLocation).orElseThrow();
         ReloadShaderManager.recordCopyResource(programResourceLocation, programResource);
         JsonObject jsonObject = GsonHelper.parse(new InputStreamReader(resourceProvider.getResource(programResourceLocation).orElseThrow().open(), StandardCharsets.UTF_8));
-        ResourceLocation vertex = new ResourceLocation(GsonHelper.getAsString(jsonObject, "vertex"));
-        ResourceLocation vertexResourceLocation = new ResourceLocation(vertex.getNamespace(), "shaders/core/" + vertex.getPath() + ".vsh");
+        Identifier vertex = new Identifier(GsonHelper.getAsString(jsonObject, "vertex"));
+        Identifier vertexResourceLocation = new Identifier(vertex.getNamespace(), "shaders/core/" + vertex.getPath() + ".vsh");
         ReloadShaderManager.recordCopyResource(vertexResourceLocation, resourceProvider.getResource(vertexResourceLocation).orElseThrow());
-        ResourceLocation fragment = new ResourceLocation(GsonHelper.getAsString(jsonObject, "fragment"));
-        ResourceLocation fragmentResourceLocation = new ResourceLocation(fragment.getNamespace(), "shaders/core/" + fragment.getPath() + ".fsh");
+        Identifier fragment = new Identifier(GsonHelper.getAsString(jsonObject, "fragment"));
+        Identifier fragmentResourceLocation = new Identifier(fragment.getNamespace(), "shaders/core/" + fragment.getPath() + ".fsh");
         ReloadShaderManager.recordCopyResource(fragmentResourceLocation, resourceProvider.getResource(fragmentResourceLocation).orElseThrow());
     }
 
@@ -141,27 +141,27 @@ public class ReloadShaderManager {
         }
 
         @Override
-        public List<Resource> getResourceStack(ResourceLocation location) {
+        public List<Resource> getResourceStack(Identifier location) {
             return List.of(getResource(location).orElseThrow());
         }
 
         @Override
-        public Map<ResourceLocation, Resource> listResources(String path, Predicate<ResourceLocation> filter) {
+        public Map<Identifier, Resource> listResources(String path, Predicate<Identifier> filter) {
             return Map.of();
         }
 
         @Override
-        public Map<ResourceLocation, List<Resource>> listResourceStacks(String path, Predicate<ResourceLocation> filter) {
+        public Map<Identifier, List<Resource>> listResourceStacks(String path, Predicate<Identifier> filter) {
             return Map.of();
         }
 
         @Override
-        public Optional<Resource> getResource(ResourceLocation location) {
+        public Optional<Resource> getResource(Identifier location) {
             return Optional.of(reloadResources.get(location));
         }
 
         @Override
-        public Resource getResourceOrThrow(ResourceLocation resourceLocation) throws FileNotFoundException {
+        public Resource getResourceOrThrow(Identifier resourceLocation) throws FileNotFoundException {
             try {
                 return Objects.requireNonNull(reloadResources.get(resourceLocation));
             }catch (NullPointerException e){
@@ -170,12 +170,12 @@ public class ReloadShaderManager {
         }
 
         @Override
-        public InputStream open(ResourceLocation resourceLocation) throws IOException {
+        public InputStream open(Identifier resourceLocation) throws IOException {
             return reloadResources.get(resourceLocation).open();
         }
 
         @Override
-        public BufferedReader openAsReader(ResourceLocation resourceLocation) throws IOException {
+        public BufferedReader openAsReader(Identifier resourceLocation) throws IOException {
             return reloadResources.get(resourceLocation).openAsReader();
         }
 
@@ -185,7 +185,7 @@ public class ReloadShaderManager {
         }
     };
 
-    public static PostChain backupNewPostChain(TextureManager textureManager, ResourceManager resourceManager, RenderTarget renderTarget, ResourceLocation resourceLocation) throws IOException {
+    public static PostChain backupNewPostChain(TextureManager textureManager, ResourceManager resourceManager, RenderTarget renderTarget, Identifier resourceLocation) throws IOException {
         if (foreReloadAll) {
             return new PostChain(textureManager, reloadResourceManager, renderTarget, resourceLocation);
         }
@@ -194,7 +194,7 @@ public class ReloadShaderManager {
         return postChain;
     }
 
-    private static void recordPostChainResource(ResourceManager resourceManager, ResourceLocation resourceLocation) throws IOException {
+    private static void recordPostChainResource(ResourceManager resourceManager, Identifier resourceLocation) throws IOException {
         Resource postChainResource = resourceManager.getResource(resourceLocation).orElseThrow();
         recordCopyResource(resourceLocation, postChainResource);
     }
@@ -209,18 +209,18 @@ public class ReloadShaderManager {
     }
 
     private static void recordEffectInstanceResource(ResourceManager resourceProvider, String shaderName) throws IOException {
-        ResourceLocation resourceLocation = make(ResourceLocation.tryParse(shaderName), (rl) ->
-                new ResourceLocation(rl.getNamespace(), "shaders/program/" + rl.getPath() + ".json"));
+        Identifier resourceLocation = make(Identifier.tryParse(shaderName), (rl) ->
+                new Identifier(rl.getNamespace(), "shaders/program/" + rl.getPath() + ".json"));
         Resource effectResource = resourceProvider.getResource(resourceLocation).orElseThrow();
         recordCopyResource(resourceLocation, effectResource);
         JsonObject effectJsonObject = GsonHelper.parse(new InputStreamReader(resourceProvider.getResource(resourceLocation).orElseThrow().open(), StandardCharsets.UTF_8));
         String vertex = GsonHelper.getAsString(effectJsonObject, "vertex");
-        ResourceLocation vertexResourceLocation = make(ResourceLocation.tryParse(vertex), rl ->
-                new ResourceLocation(rl.getNamespace(), "shaders/program/" + rl.getPath() + ".vsh"));
+        Identifier vertexResourceLocation = make(Identifier.tryParse(vertex), rl ->
+                new Identifier(rl.getNamespace(), "shaders/program/" + rl.getPath() + ".vsh"));
         recordCopyResource(vertexResourceLocation, resourceProvider.getResource(vertexResourceLocation).orElseThrow());
         String fragment = GsonHelper.getAsString(effectJsonObject, "fragment");
-        ResourceLocation fragmentResourceLocation = make(ResourceLocation.tryParse(fragment), rl ->
-                new ResourceLocation(rl.getNamespace(), "shaders/program/" + rl.getPath() + ".fsh"));
+        Identifier fragmentResourceLocation = make(Identifier.tryParse(fragment), rl ->
+                new Identifier(rl.getNamespace(), "shaders/program/" + rl.getPath() + ".fsh"));
         recordCopyResource(fragmentResourceLocation, resourceProvider.getResource(fragmentResourceLocation).orElseThrow());
     }
 

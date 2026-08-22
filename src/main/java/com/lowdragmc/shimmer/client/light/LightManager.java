@@ -21,7 +21,7 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -489,7 +489,7 @@ public enum LightManager {
 						registerBlockLight(block,blockLight.color(),blockLight.radius);
 					}
 				}else {
-					Pair<ResourceLocation, Fluid> fluidPair = blockLight.fluid();
+					Pair<Identifier, Fluid> fluidPair = blockLight.fluid();
 					if (fluidPair.right() == null) continue;
 
 					registerFluidLight(fluidPair.right(),blockLight.color(),blockLight.radius);
@@ -499,11 +499,11 @@ public enum LightManager {
 			for (var  itemLight : config.itemLights){
 				var template = new ColorPointLight.Template(itemLight.radius, itemLight.color());
 				if (itemLight.itemName != null){
-					if (!ResourceLocation.isValidResourceLocation(itemLight.itemName)){
+					if (!Identifier.isValid(itemLight.itemName)){
 						ShimmerConstants.LOGGER.error("invalid item name " + itemLight.itemName + " form" + config.configSource);
 						continue;
 					}
-					var itemLocation = new ResourceLocation(itemLight.itemName);
+					var itemLocation = new Identifier(itemLight.itemName);
 					if (!BuiltInRegistries.ITEM.containsKey(itemLocation)){
 						ShimmerConstants.LOGGER.error("can't find item " + itemLocation + " from" + config.configSource);
 						continue;
@@ -511,11 +511,11 @@ public enum LightManager {
 					var item = BuiltInRegistries.ITEM.get(itemLocation);
 					registerItemLight(item, itemStack -> template);
 				}else {
-					if (!ResourceLocation.isValidResourceLocation(itemLight.itemTag)){
+					if (!Identifier.isValid(itemLight.itemTag)){
 						ShimmerConstants.LOGGER.error("invalid item tag name " + itemLight.itemTag + " form" + config.configSource);
 						continue;
 					}
-					registerTagLight(new ResourceLocation(itemLight.itemTag),itemStack -> template);
+					registerTagLight(new Identifier(itemLight.itemTag),itemStack -> template);
 				}
 			}
 		}
@@ -548,7 +548,7 @@ public enum LightManager {
 
     // *********************** held item light *********************** //
     private final Map<Item,Function<ItemStack,ColorPointLight.Template>> ITEM_MAP = new HashMap<>();
-    private final Map<ResourceLocation,Function<ItemStack,ColorPointLight.Template>> TAG_MAP = new HashMap<>();
+    private final Map<Identifier,Function<ItemStack,ColorPointLight.Template>> TAG_MAP = new HashMap<>();
 
     @Nullable
     public ColorPointLight getItemLight(@NotNull ItemStack itemStack, Vec3 pos){
@@ -582,7 +582,7 @@ public enum LightManager {
      * @param tag the item tag used for identify
      * @param function supplier light supplier from an ItemStack
      */
-    public void registerTagLight(ResourceLocation tag,Function<ItemStack,ColorPointLight.Template> function){
+    public void registerTagLight(Identifier tag,Function<ItemStack,ColorPointLight.Template> function){
         TAG_MAP.put(tag,function);
     }
 

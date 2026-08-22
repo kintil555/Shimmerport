@@ -9,7 +9,7 @@ import com.lowdragmc.shimmer.config.ShimmerConfig;
 import com.lowdragmc.shimmer.event.ShimmerLoadConfigEvent;
 import com.lowdragmc.shimmer.platform.Services;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +31,7 @@ public class Configuration {
 	/**
 	 * config location from mod jar and resource packs
 	 */
-	private static final ResourceLocation configLocation = new ResourceLocation(ShimmerConstants.MOD_ID, configurationFileName);
+	private static final Identifier configLocation = new Identifier(ShimmerConstants.MOD_ID, configurationFileName);
 
 	/**
 	 * the Gson object, with pretty print
@@ -82,7 +82,7 @@ public class Configuration {
 			for (var modId : Services.PLATFORM.getLoadedMods()) {
 				if (modId.equals(ShimmerConstants.MOD_ID)) continue;
 				causedSource = " automatic configuration added by mod " + modId;
-				ResourceLocation candidateConfigurationPath = new ResourceLocation(modId, configurationFileName);
+				Identifier candidateConfigurationPath = new Identifier(modId, configurationFileName);
 				Optional<String> optionalConfiguration = readConfiguration(candidateConfigurationPath);
 				if (optionalConfiguration.isPresent()) {
 					ShimmerConfig config = gson.fromJson(optionalConfiguration.get(), ShimmerConfig.class);
@@ -145,7 +145,7 @@ public class Configuration {
 	/**
 	 * read shimmer configuration from path
 	 */
-	public static Optional<String> readConfiguration(ResourceLocation configurationPath) {
+	public static Optional<String> readConfiguration(Identifier configurationPath) {
 		var resources = Minecraft.getInstance().getResourceManager().getResourceStack(configurationPath);
 		if (resources.size() > 1) {
 			ShimmerConstants.LOGGER.error("find multi shimmer configuration file under " + configurationPath);

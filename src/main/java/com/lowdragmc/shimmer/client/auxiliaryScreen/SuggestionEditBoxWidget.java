@@ -6,7 +6,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
@@ -36,30 +36,30 @@ public class SuggestionEditBoxWidget extends EditBox {
 	/**
 	 * cache for current mode
 	 */
-	private Set<ResourceLocation> allSuggestion;
+	private Set<Identifier> allSuggestion;
 	/**
 	 * all cache for all modes
 	 */
-	private static Map<KeyType, Set<ResourceLocation>> cache;
+	private static Map<KeyType, Set<Identifier>> cache;
 	String lastContent;
 	String candidate;
 	String lastCandidate;
 	boolean isComplete = false;
-	List<BiConsumer<KeyType, ResourceLocation>> completeListeners = new ArrayList<>();
-	List<BiConsumer<KeyType, ResourceLocation>> candidateListeners = new ArrayList<>();
+	List<BiConsumer<KeyType, Identifier>> completeListeners = new ArrayList<>();
+	List<BiConsumer<KeyType, Identifier>> candidateListeners = new ArrayList<>();
 	KeyType type = KeyType.DEFAULT;
 
 	/**
 	 * @param consumer callbacks called when complete rigged
 	 */
-	public void addCompleteListener(BiConsumer<KeyType, ResourceLocation> consumer) {
+	public void addCompleteListener(BiConsumer<KeyType, Identifier> consumer) {
 		completeListeners.add(consumer);
 	}
 
 	/**
 	 * @param consumer callbacks called when candidate change
 	 */
-	public void addCandidateListener(BiConsumer<KeyType, ResourceLocation> consumer) {
+	public void addCandidateListener(BiConsumer<KeyType, Identifier> consumer) {
 		candidateListeners.add(consumer);
 	}
 
@@ -71,8 +71,8 @@ public class SuggestionEditBoxWidget extends EditBox {
 		super.tick();
 		var last = isComplete;
 		//check complete change
-		if (ResourceLocation.isValidResourceLocation(this.getValue())) {
-			ResourceLocation resourceLocation = new ResourceLocation(this.getValue());
+		if (Identifier.isValid(this.getValue())) {
+			Identifier resourceLocation = new Identifier(this.getValue());
 			isComplete = allSuggestion.contains(resourceLocation);
 			if (!last && isComplete) {
 				completeListeners.forEach(item -> item.accept(type, resourceLocation));
@@ -83,8 +83,8 @@ public class SuggestionEditBoxWidget extends EditBox {
 		//check candidate change
 		if (!Objects.equals(candidate, lastCandidate)) {
 			lastCandidate = candidate;
-			if (lastCandidate != null && ResourceLocation.isValidResourceLocation(lastCandidate)) {
-				ResourceLocation resourceLocation = new ResourceLocation(lastCandidate);
+			if (lastCandidate != null && Identifier.isValid(lastCandidate)) {
+				Identifier resourceLocation = new Identifier(lastCandidate);
 				if (allSuggestion.contains(resourceLocation)) {
 					candidateListeners.forEach(item -> item.accept(type, resourceLocation));
 				}
@@ -107,10 +107,10 @@ public class SuggestionEditBoxWidget extends EditBox {
 			if (!Objects.equals(currentContent, lastContent)) {
 				lastContent = currentContent;
 				if (!currentContent.contains(":")) {
-					suggestions = allSuggestion.stream().parallel().map(ResourceLocation::getNamespace).collect(Collectors.toSet()).stream().toList();
+					suggestions = allSuggestion.stream().parallel().map(Identifier::getNamespace).collect(Collectors.toSet()).stream().toList();
 				} else {
 					lastContent = currentContent;
-					suggestions = allSuggestion.stream().parallel().map(ResourceLocation::toString).filter(res -> res.startsWith(currentContent)).toList();
+					suggestions = allSuggestion.stream().parallel().map(Identifier::toString).filter(res -> res.startsWith(currentContent)).toList();
 				}
 			}
 

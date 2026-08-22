@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.lowdragmc.shimmer.ShimmerConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public record ShimmerMetadataSection(boolean bloom) {
     public static final String SECTION_NAME = ShimmerConstants.MOD_ID;
-    private static final Map<ResourceLocation, ShimmerMetadataSection> METADATA_CACHE = new ConcurrentHashMap<>();
+    private static final Map<Identifier, ShimmerMetadataSection> METADATA_CACHE = new ConcurrentHashMap<>();
     public static final ShimmerMetadataSection MISSING = new ShimmerMetadataSection(false);
 
     public static void clearCache() {
@@ -23,7 +23,7 @@ public record ShimmerMetadataSection(boolean bloom) {
     }
 
     @Nullable
-    public static ShimmerMetadataSection getMetadata(ResourceLocation res) {
+    public static ShimmerMetadataSection getMetadata(Identifier res) {
         if (METADATA_CACHE.containsKey(res)) {
             return METADATA_CACHE.get(res);
         }
@@ -46,12 +46,12 @@ public record ShimmerMetadataSection(boolean bloom) {
         return ret != null && ret.bloom;
     }
 
-    public static ResourceLocation spriteToAbsolute(ResourceLocation sprite) {
+    public static Identifier spriteToAbsolute(Identifier sprite) {
         if (!sprite.getPath().startsWith("textures/")) {
-            sprite = new ResourceLocation(sprite.getNamespace(), "textures/" + sprite.getPath());
+            sprite = new Identifier(sprite.getNamespace(), "textures/" + sprite.getPath());
         }
         if (!sprite.getPath().endsWith(".png")) {
-            sprite = new ResourceLocation(sprite.getNamespace(), sprite.getPath() + ".png");
+            sprite = new Identifier(sprite.getNamespace(), sprite.getPath() + ".png");
         }
         return sprite;
     }

@@ -14,7 +14,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.phys.Vec3;
@@ -119,17 +119,17 @@ public abstract class LevelRendererMixin {
 
     @SuppressWarnings({"UnresolvedMixinReference", "InvalidMemberReference", "InvalidInjectorMethodSignature", "MixinAnnotationTarget"})
     @Redirect(method = "initOutline",at = @At(value = "NEW",
-            target = "(Lnet/minecraft/client/renderer/texture/TextureManager;Lnet/minecraft/server/packs/resources/ResourceManager;Lcom/mojang/blaze3d/pipeline/RenderTarget;Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/PostChain;"
+            target = "(Lnet/minecraft/client/renderer/texture/TextureManager;Lnet/minecraft/server/packs/resources/ResourceManager;Lcom/mojang/blaze3d/pipeline/RenderTarget;Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/PostChain;"
     ))
-    private PostChain redirectInitOutline(TextureManager textureManager, ResourceManager resourceManager, RenderTarget renderTarget, ResourceLocation resourceLocation) throws IOException {
+    private PostChain redirectInitOutline(TextureManager textureManager, ResourceManager resourceManager, RenderTarget renderTarget, Identifier resourceLocation) throws IOException {
         return ReloadShaderManager.backupNewPostChain(textureManager,resourceManager,renderTarget,resourceLocation);
     }
 
     @SuppressWarnings({"UnresolvedMixinReference", "InvalidMemberReference", "InvalidInjectorMethodSignature", "MixinAnnotationTarget"})
     @Redirect(method = "initTransparency",at = @At(value = "NEW",
-            target = "(Lnet/minecraft/client/renderer/texture/TextureManager;Lnet/minecraft/server/packs/resources/ResourceManager;Lcom/mojang/blaze3d/pipeline/RenderTarget;Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/PostChain;"
+            target = "(Lnet/minecraft/client/renderer/texture/TextureManager;Lnet/minecraft/server/packs/resources/ResourceManager;Lcom/mojang/blaze3d/pipeline/RenderTarget;Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/PostChain;"
     ))
-    private PostChain redirectInitTransparency(TextureManager textureManager, ResourceManager resourceManager, RenderTarget renderTarget, ResourceLocation resourceLocation) throws IOException {
+    private PostChain redirectInitTransparency(TextureManager textureManager, ResourceManager resourceManager, RenderTarget renderTarget, Identifier resourceLocation) throws IOException {
         return ReloadShaderManager.backupNewPostChain(textureManager,resourceManager,renderTarget,resourceLocation);
     }
 }

@@ -10,7 +10,7 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL43;
@@ -72,7 +72,7 @@ public class RenderUtils {
 
     public static Pair<ShaderInstance, Consumer<ShaderInstance>> registerShaders(ResourceManager resourceManager) {
         try {
-            return Pair.of(ReloadShaderManager.backupNewShaderInstance(resourceManager, new ResourceLocation(ShimmerConstants.MOD_ID, "fast_blit").toString(), DefaultVertexFormat.POSITION), shaderInstance -> {
+            return Pair.of(ReloadShaderManager.backupNewShaderInstance(resourceManager, new Identifier(ShimmerConstants.MOD_ID, "fast_blit").toString(), DefaultVertexFormat.POSITION), shaderInstance -> {
                 blitShader = shaderInstance;
             });
         } catch (IOException e) {

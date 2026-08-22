@@ -22,7 +22,7 @@ public abstract class ShaderInstanceMixin {
     /**
      * @author HypherionSA
      * @date 2022/06/09
-     * Ensure the shader is loading from the correct resource location. Fabric ignores the ResourceLocation path passed to this method
+     * Ensure the shader is loading from the correct resource location. Fabric ignores the Identifier path passed to this method
      */
     @ModifyArg(method = "getOrCreate", at = @At(value = "INVOKE", target = "Lnet/minecraft/FileUtil;getFullResourcePath(Ljava/lang/String;)Ljava/lang/String;"), index = 0)
     private static String injectResourcePath(String string) {

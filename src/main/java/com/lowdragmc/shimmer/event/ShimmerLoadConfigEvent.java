@@ -1,7 +1,7 @@
 package com.lowdragmc.shimmer.event;
 
 import com.lowdragmc.shimmer.Configuration;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +29,7 @@ public class ShimmerLoadConfigEvent implements ShimmerEvent{
 	/**
 	 * @param configurationPath the full resourceLocation of shimmer configuration name should be like modID$path
 	 */
-	public void addConfiguration(ResourceLocation configurationPath) {
+	public void addConfiguration(Identifier configurationPath) {
 		Configuration.readConfiguration(configurationPath)
 				.ifPresent(configString -> additionConfigurations.put(configurationPath.getNamespace(), configString));
     }

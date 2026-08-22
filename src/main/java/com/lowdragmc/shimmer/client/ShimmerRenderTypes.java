@@ -4,10 +4,10 @@ import com.lowdragmc.shimmer.ShimmerConstants;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.io.IOException;
@@ -21,13 +21,13 @@ import java.util.function.Function;
  */
 public class ShimmerRenderTypes {
 
-    public static RenderType emissiveArmor(ResourceLocation resourceLocation) {
+    public static RenderType emissiveArmor(Identifier resourceLocation) {
         return EmissiveArmorRenderType.EMISSIVE_ARMOR_CUTOUT_NO_CULL.apply(resourceLocation);
     }
 
     public static Pair<ShaderInstance, Consumer<ShaderInstance>> registerShaders(ResourceManager resourceManager) {
         try {
-            return Pair.of(new ShaderInstance(resourceManager, new ResourceLocation(ShimmerConstants.MOD_ID, "rendertype_armor_cutout_no_cull").toString(), DefaultVertexFormat.NEW_ENTITY),
+            return Pair.of(new ShaderInstance(resourceManager, new Identifier(ShimmerConstants.MOD_ID, "rendertype_armor_cutout_no_cull").toString(), DefaultVertexFormat.NEW_ENTITY),
                     shaderInstance -> EmissiveArmorRenderType.emissiveArmorGlintShader = shaderInstance);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -45,7 +45,7 @@ public class ShimmerRenderTypes {
             throw new IllegalStateException("This class is not meant to be constructed!");
         }
 
-        private static final Function<ResourceLocation, RenderType> EMISSIVE_ARMOR_CUTOUT_NO_CULL = Util.memoize((p_173206_) -> {
+        private static final Function<Identifier, RenderType> EMISSIVE_ARMOR_CUTOUT_NO_CULL = Util.memoize((p_173206_) -> {
             CompositeState rendertype$compositestate = CompositeState.builder()
                     .setShaderState(RENDERTYPE_BLOOM_SHADER)
                     .setTextureState(new TextureStateShard(p_173206_, false, false))

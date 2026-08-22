@@ -14,12 +14,12 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.FastColor;
 import org.lwjgl.opengl.GL15;
@@ -298,7 +298,7 @@ public enum Eyedropper {
 	 */
 	public static Pair<ShaderInstance, Consumer<ShaderInstance>> registerShaders(ResourceManager resourceManager) {
 		try {
-			return Pair.of(new ShaderInstance(resourceManager, new ResourceLocation(ShimmerConstants.MOD_ID, "pick_color").toString(), DefaultVertexFormat.POSITION),
+			return Pair.of(new ShaderInstance(resourceManager, new Identifier(ShimmerConstants.MOD_ID, "pick_color").toString(), DefaultVertexFormat.POSITION),
 					Eyedropper.mode::setShader);
 		} catch (IOException e) {
 			throw new RuntimeException(e);

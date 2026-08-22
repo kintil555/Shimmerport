@@ -1,7 +1,7 @@
 package com.lowdragmc.shimmer.client;
 
 import com.google.common.collect.Maps;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
@@ -13,10 +13,10 @@ import java.util.Map;
  * @implNote ResourceUtils
  */
 public class ResourceUtils {
-    private static final Map<ResourceLocation, Boolean> cachedTexture = Maps.newHashMap();
-    private static final Map<ResourceLocation, Boolean> cachedResources = Maps.newHashMap();
+    private static final Map<Identifier, Boolean> cachedTexture = Maps.newHashMap();
+    private static final Map<Identifier, Boolean> cachedResources = Maps.newHashMap();
 
-    public static boolean isTextureExist(ResourceLocation rs) {
+    public static boolean isTextureExist(Identifier rs) {
         if (!cachedTexture.containsKey(rs)) {
             InputStream inputstream = ResourceUtils.class.getResourceAsStream(String.format("/assets/%s/textures/%s.png", rs.getNamespace(), rs.getPath()));
             if (inputstream == null) {
@@ -30,7 +30,7 @@ public class ResourceUtils {
         return cachedTexture.get(rs);
     }
 
-    public static boolean isResourceExist(ResourceLocation rs) {
+    public static boolean isResourceExist(Identifier rs) {
         if (!cachedResources.containsKey(rs)) {
             InputStream inputstream = ResourceUtils.class.getResourceAsStream(String.format("/assets/%s/%s", rs.getNamespace(), rs.getPath()));
             if (inputstream == null) {

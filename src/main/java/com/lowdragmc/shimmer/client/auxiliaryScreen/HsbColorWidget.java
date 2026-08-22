@@ -14,7 +14,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.FastColor;
 import org.lwjgl.glfw.GLFW;
@@ -493,7 +493,7 @@ public class HsbColorWidget extends AbstractWidget {
 	 */
 	public static Pair<ShaderInstance, Consumer<ShaderInstance>> registerShaders(ResourceManager resourceManager) {
 		try {
-			return Pair.of(new ShaderInstance(resourceManager, new ResourceLocation(ShimmerConstants.MOD_ID, "hsb_block").toString(), HSB_VERTEX_FORMAT),
+			return Pair.of(new ShaderInstance(resourceManager, new Identifier(ShimmerConstants.MOD_ID, "hsb_block").toString(), HSB_VERTEX_FORMAT),
 					shaderInstance -> hsbShader = shaderInstance);
 		} catch (IOException e) {
 			throw new RuntimeException(e);

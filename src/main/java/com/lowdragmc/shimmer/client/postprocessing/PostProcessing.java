@@ -30,7 +30,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -57,13 +57,13 @@ public class PostProcessing implements ResourceManagerReloadListener {
     public static final Set<RenderType> CHUNK_TYPES = Sets.newHashSet(RenderType.solid(), RenderType.cutoutMipped(), RenderType.cutout());
 
     private static final Map<String, PostProcessing> POST_PROCESSING_MAP = new HashMap<>();
-    public static final PostProcessing BLOOM_UNREAL = new PostProcessing("bloom_unreal", new ResourceLocation(ShimmerConstants.MOD_ID, "shaders/post/bloom_unreal.json"));
-    public static final PostProcessing BLOOM_UNITY = new PostProcessing("bloom_unity", new ResourceLocation(ShimmerConstants.MOD_ID, "shaders/post/bloom_unity.json"));
-    public static final PostProcessing WARP = new PostProcessing("warp", new ResourceLocation(ShimmerConstants.MOD_ID, "shaders/post/warp.json"));
-    public static final PostProcessing VHS = new PostProcessing("vhs", new ResourceLocation(ShimmerConstants.MOD_ID, "shaders/post/vhs.json"));
-    public static final PostProcessing FLICKER = new PostProcessing("flicker", new ResourceLocation(ShimmerConstants.MOD_ID, "shaders/post/flicker.json"));
-    public static final PostProcessing HALFTONE = new PostProcessing("halftone", new ResourceLocation(ShimmerConstants.MOD_ID, "shaders/post/halftone.json"));
-    public static final PostProcessing DOT_SCREEN = new PostProcessing("dot_screen", new ResourceLocation(ShimmerConstants.MOD_ID, "shaders/post/dot_screen.json"));
+    public static final PostProcessing BLOOM_UNREAL = new PostProcessing("bloom_unreal", new Identifier(ShimmerConstants.MOD_ID, "shaders/post/bloom_unreal.json"));
+    public static final PostProcessing BLOOM_UNITY = new PostProcessing("bloom_unity", new Identifier(ShimmerConstants.MOD_ID, "shaders/post/bloom_unity.json"));
+    public static final PostProcessing WARP = new PostProcessing("warp", new Identifier(ShimmerConstants.MOD_ID, "shaders/post/warp.json"));
+    public static final PostProcessing VHS = new PostProcessing("vhs", new Identifier(ShimmerConstants.MOD_ID, "shaders/post/vhs.json"));
+    public static final PostProcessing FLICKER = new PostProcessing("flicker", new Identifier(ShimmerConstants.MOD_ID, "shaders/post/flicker.json"));
+    public static final PostProcessing HALFTONE = new PostProcessing("halftone", new Identifier(ShimmerConstants.MOD_ID, "shaders/post/halftone.json"));
+    public static final PostProcessing DOT_SCREEN = new PostProcessing("dot_screen", new Identifier(ShimmerConstants.MOD_ID, "shaders/post/dot_screen.json"));
 
     public static AtomicBoolean enableBloomFilter = new AtomicBoolean(false);
     private static final Minecraft mc = Minecraft.getInstance();
@@ -72,13 +72,13 @@ public class PostProcessing implements ResourceManagerReloadListener {
     private CopyDepthColorTarget postTargetWithColor;
     private PostChain postChain = null;
     private boolean loadFailed = false;
-    private final ResourceLocation shader;
+    private final Identifier shader;
     private final List<Consumer<MultiBufferSource>> postEntityDrawFilter = Lists.newArrayList();
     private final List<Consumer<MultiBufferSource>> postEntityDrawForce = Lists.newArrayList();
     private final Map<ParticleRenderType, IPostParticleType> particleTypeMap = Maps.newHashMap();
     private boolean hasParticle;
 
-    private PostProcessing(String name, ResourceLocation shader) {
+    private PostProcessing(String name, Identifier shader) {
         this.shader = shader;
         this.name = name;
         POST_PROCESSING_MAP.put(name, this);
@@ -90,7 +90,7 @@ public class PostProcessing implements ResourceManagerReloadListener {
      * @param shader post shader
      * @return PostProcessing
      */
-    public static PostProcessing registerPost(String name, ResourceLocation shader) {
+    public static PostProcessing registerPost(String name, Identifier shader) {
         return new PostProcessing(name, shader);
     }
 
@@ -475,7 +475,7 @@ public class PostProcessing implements ResourceManagerReloadListener {
 
     public static Set<BlockState> BLOOM_BLOCK = new HashSet<>();
     public static Set<Fluid> BLOOM_FLUID = new HashSet<>();
-    public static Set<ResourceLocation> BLOOM_PARTICLE = new HashSet<>();
+    public static Set<Identifier> BLOOM_PARTICLE = new HashSet<>();
     private static final ThreadLocal<Boolean> BLOCK_BLOOM = ThreadLocal.withInitial(()->false);
     private static final ThreadLocal<Boolean> FLUID_BLOOM = ThreadLocal.withInitial(()->false);
 
@@ -487,14 +487,14 @@ public class PostProcessing implements ResourceManagerReloadListener {
 		for (var config : Configuration.configs){
 			for (var bloom : config.blooms){
 				if (bloom.particleName != null) {
-					if (!ResourceLocation.isValidResourceLocation(bloom.particleName)){
+					if (!Identifier.isValid(bloom.particleName)){
 						ShimmerConstants.LOGGER.error("invalid particle name " + bloom.particleName + " form" + config.configSource);
 						continue;
 					}
-					var particleLocation = new ResourceLocation(bloom.particleName);
+					var particleLocation = new Identifier(bloom.particleName);
 					BLOOM_PARTICLE.add(particleLocation);
 				}else if (bloom.fluidName != null){
-					Pair<ResourceLocation, Fluid> fluid = bloom.fluid();
+					Pair<Identifier, Fluid> fluid = bloom.fluid();
 					if (fluid == null || fluid.right() == null) continue;
 					BLOOM_FLUID.add(fluid.right());
 				}else {

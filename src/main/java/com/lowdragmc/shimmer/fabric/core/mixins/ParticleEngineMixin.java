@@ -24,7 +24,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -59,7 +59,7 @@ public abstract class ParticleEngineMixin implements IParticleEngine {
     @Shadow @Final private Map<ParticleRenderType, Queue<Particle>> particles;
 
     @Shadow @Final private Queue<Particle> particlesToAdd;
-    private final Map<ResourceLocation, String> PARTICLE_EFFECT = Maps.newHashMap();
+    private final Map<Identifier, String> PARTICLE_EFFECT = Maps.newHashMap();
 
     @Nullable
     public Particle createPostParticle(PostProcessing postProcessing, ParticleOptions pParticleData, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
@@ -84,7 +84,7 @@ public abstract class ParticleEngineMixin implements IParticleEngine {
 
     @ModifyExpressionValue(method = "loadParticleDescription",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleDescription;fromJson(Lcom/google/gson/JsonObject;)Lnet/minecraft/client/particle/ParticleDescription;"))
-    private ParticleDescription injectLoad(ParticleDescription particleDescription,ResourceLocation registryName, Resource resource){
+    private ParticleDescription injectLoad(ParticleDescription particleDescription,Identifier registryName, Resource resource){
         if(particleDescription instanceof IParticleDescription description && description.getEffect() != null){
             PARTICLE_EFFECT.put(registryName,description.getEffect());
         }
@@ -98,7 +98,7 @@ public abstract class ParticleEngineMixin implements IParticleEngine {
 
     @Inject(method = "createParticle", at = @At(value = "HEAD"), cancellable = true)
     private void injectCreateParticle(ParticleOptions particleOptions, double x, double y, double z, double sx, double sy, double sz, CallbackInfoReturnable<Particle> cir) {
-        ResourceLocation name = BuiltInRegistries.PARTICLE_TYPE.getKey(particleOptions.getType());
+        Identifier name = BuiltInRegistries.PARTICLE_TYPE.getKey(particleOptions.getType());
         if (!ShimmerMixinPlugin.IS_OPT_LOAD) {
             if (PARTICLE_EFFECT.containsKey(name)) {
                 PostProcessing postProcessing = PostProcessing.getPost(PARTICLE_EFFECT.get(name));

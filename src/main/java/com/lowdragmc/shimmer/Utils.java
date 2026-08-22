@@ -2,7 +2,7 @@ package com.lowdragmc.shimmer;
 
 import com.lowdragmc.shimmer.platform.Services;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -50,7 +50,7 @@ public class Utils {
 		}).toList();
 	}
 
-	public static boolean checkBlockProperties(String configSource, Map<String,String> state, ResourceLocation blockLocation) {
+	public static boolean checkBlockProperties(String configSource, Map<String,String> state, Identifier blockLocation) {
 		var block = BuiltInRegistries.BLOCK.get(blockLocation);
 		List<String> properties = block.getStateDefinition().getProperties().stream().map(Property::getName).toList();
 		var lack = state.keySet().stream().filter(key->!properties.contains(key)).toList();

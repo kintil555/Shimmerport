@@ -6,7 +6,7 @@ import com.lowdragmc.shimmer.client.postprocessing.PostParticle;
 import com.lowdragmc.shimmer.client.postprocessing.PostProcessing;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluid;
 
 import java.nio.file.Path;
@@ -92,7 +92,7 @@ public interface IPlatformHelper {
 
     boolean isEnableInsetShaderInfo();
 
-	ResourceLocation getFluidTextureLocation(Fluid fluid, boolean isStill);
+	Identifier getFluidTextureLocation(Fluid fluid, boolean isStill);
 
 	int getFluidColor(Fluid fluid);
 

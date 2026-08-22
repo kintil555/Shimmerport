@@ -1,6 +1,6 @@
 package com.lowdragmc.shimmer.fabric.core.mixins;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
  * @author HypherionSA
  * @date 2022/06/09
  */
-@Mixin(ResourceLocation.class)
+@Mixin(Identifier.class)
 public class ResourceLocationMixin {
 
     /***
@@ -17,7 +17,7 @@ public class ResourceLocationMixin {
      * @param string
      * @return
      */
-    @ModifyArg(method = "<init>(Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/ResourceLocation;decompose(Ljava/lang/String;C)[Ljava/lang/String;", ordinal = 0))
+    @ModifyArg(method = "<init>(Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/Identifier;decompose(Ljava/lang/String;C)[Ljava/lang/String;", ordinal = 0))
     private static String decomposeInject(String string) {
         if (string.startsWith("shaders") && string.contains("shimmer:")) {
             return "shimmer:" + string.replace("shimmer:", "");

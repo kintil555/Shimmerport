@@ -11,7 +11,7 @@ import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluid;
 import org.lwjgl.opengl.GL30;
 
@@ -109,7 +109,7 @@ public class FabricPlatformHelper implements IPlatformHelper {
 	}
 
 	@Override
-	public ResourceLocation getFluidTextureLocation(Fluid fluid, boolean isStill) {
+	public Identifier getFluidTextureLocation(Fluid fluid, boolean isStill) {
 		FluidRenderHandler handler = FluidRenderHandlerRegistry.INSTANCE.get(fluid);
 		TextureAtlasSprite[] sprites = handler.getFluidSprites(null, null, fluid.defaultFluidState());
 		return (isStill ? sprites[0] : sprites[1]).atlasLocation();

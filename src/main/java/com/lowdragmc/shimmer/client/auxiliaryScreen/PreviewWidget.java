@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -28,7 +28,7 @@ import java.util.Objects;
 public class PreviewWidget extends AbstractWidget {
 
 	private KeyType type;
-	private ResourceLocation resourceLocation;
+	private Identifier resourceLocation;
 	/**
 	 * scale for show
 	 */
@@ -64,7 +64,7 @@ public class PreviewWidget extends AbstractWidget {
 				}
 				case BLOOM_PARTICLE -> {
 					TextureAtlas textureAtlas = Minecraft.getInstance().particleEngine.textureAtlas;
-					TextureAtlasSprite sprite = textureAtlas.getSprite(new ResourceLocation(resourceLocation.getNamespace(), "particle/" + resourceLocation.getPath()));
+					TextureAtlasSprite sprite = textureAtlas.getSprite(new Identifier(resourceLocation.getNamespace(), "particle/" + resourceLocation.getPath()));
 					if (Objects.equals(sprite.atlasLocation(), MissingTextureAtlasSprite.getLocation())) return;
 
 					Matrix4f pose = guiGraphics.pose().last().pose();
@@ -114,12 +114,12 @@ public class PreviewWidget extends AbstractWidget {
 		this.resourceLocation = null;
 	}
 
-	public void onContentNeedChange(KeyType type, ResourceLocation content) {
+	public void onContentNeedChange(KeyType type, Identifier content) {
 		this.type = type;
 		this.resourceLocation = content;
 	}
 
-	public void onCandidateChange(KeyType type, ResourceLocation candidate) {
+	public void onCandidateChange(KeyType type, Identifier candidate) {
 		this.type = type;
 		this.resourceLocation = candidate;
 	}
