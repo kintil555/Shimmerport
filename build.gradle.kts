@@ -1,139 +1,87 @@
-import net.fabricmc.loom.api.LoomGradleExtensionAPI
-
 plugins {
-    id("architectury-plugin")
-    id("dev.architectury.loom").apply(false)
-    id("com.github.johnrengelman.shadow").apply(false)
+    id("fabric-loom") version "1.17-SNAPSHOT"
+    `java-library`
+    `maven-publish`
 }
 
-architectury {
-    minecraft = minecraft_version
+version = "${property("minecraft_version")}-${property("version_major")}.${property("version_patch")}"
+group = property("maven_group") as String
+
+base {
+    archivesName.set(property("mod_name") as String)
 }
 
-subprojects {
-    apply(plugin = "dev.architectury.loom")
-    apply(plugin = "maven-publish")
-
-    val loom = extensions.getByType<LoomGradleExtensionAPI>()
-    loom.run {
-        silentMojangMappingsLicense()
-        this.runConfigs.forEach { setting ->
-            setting.property("mixin.debug=true")
-            setting.property("mixin.debug.export=true")
-            setting.property("mixin.dumpTargetOnFailure=true")
-            setting.property("mixin.checks.interfaces=true")
-            setting.property("mixin.hotSwap=true")
-        }
+repositories {
+    maven("https://maven.parchmentmc.org/") {
+        content { includeGroup("org.parchmentmc.data") }
     }
-    repositories {
-        flatDir {
-            dir("libs")
-        }
-        maven("https://jitpack.io")
-        maven {
-            url = uri("https://maven.parchmentmc.org/")
-            content {
-                includeGroup("org.parchmentmc.data")
-            }
-        }
-        maven {
-            url = uri("https://cursemaven.com")
-            content {
-                includeGroup("curse.maven")
-            }
-        }
-        maven {
-            name = "Modrinth"
-            url = uri("https://api.modrinth.com/maven")
-            content {
-                includeGroup("maven.modrinth")
-            }
-        }
-        maven {
-            name = "IzzelAliz Maven"
-            url = uri("https://maven.izzel.io/releases/")
-            content {
-                includeGroup("icyllis.modernui")
-            }
-        }
-        maven {
-            name = "tterrag maven"
-            url = uri("https://maven.tterrag.com/")
-            content {
-                includeGroup("com.jozufozu.flywheel")
-            }
-        }
+    maven("https://api.modrinth.com/maven") {
+        name = "Modrinth"
+        content { includeGroup("maven.modrinth") }
     }
-
-    dependencies {
-        minecraft("com.mojang:minecraft:$minecraft_version")
-        mappings(loom.layered {
-            officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-$parchment_version@zip")
-        })
-        "implementation"(mixinExtras)
-        "annotationProcessor"(mixinExtras)
-        "implementation"("org.jetbrains:annotations:24.0.1")
-    }
-
-    extensions.getByType<BasePluginExtension>().apply {
-        archivesName.set(archiveBaseName)
-    }
-
-    extensions.getByType<PublishingExtension>().apply {
-        val platformName = project.name.lowercase()
-        publications {
-            create<MavenPublication>(name = platformName) {
-                groupId = maven_group
-                artifactId = archiveBaseName
-                version = semantics_version
-                from(components.getByName<SoftwareComponent>("java"))
-            }
-            repositories {
-                maven {
-                    setUrl("https://maven.firstdarkdev.xyz/$maven_path")
-                    credentials {
-                        username = System.getenv("MAVEN_USER")
-                        password = System.getenv("MAVEN_PASS")
-                    }
-                }
-            }
-        }
-    }
-
-    tasks.create("checkMixinPlugin"){
-        val jarTask = tasks.withType<Jar> {
-            finalizedBy(this@create)
-        }
-        dependsOn(jarTask)
-        doLast {
-            this.inputs.files.files.forEach(::check)
-        }
-    }
-
-    tasks.withType<Jar>{
-        doFirst{
-            this.inputs.files.files.forEach(::check)
-        }
-    }
-
+    maven("https://maven.createmod.net/") { name = "createmod" } // Flywheel
+    maven("https://jitpack.io")
 }
 
-allprojects {
-    apply(plugin = "java")
-    apply(plugin = "architectury-plugin")
-    apply(plugin = "maven-publish")
+loom {
+    accessWidenerPath.set(file("src/main/resources/${property("mod_id")}.accesswidener"))
+    runConfigs.all {
+        property("mixin.debug", "true")
+        property("mixin.debug.export", "true")
+        property("mixin.dumpTargetOnFailure", "true")
+        property("mixin.checks.interfaces", "true")
+        property("mixin.hotSwap", "true")
+    }
+}
 
-    version = semantics_version
-    group = maven_group
+dependencies {
+    minecraft("com.mojang:minecraft:${property("minecraft_version")}")
+    // 26.2 is unobfuscated: Mojang mappings need no remapping layer.
+    // Parchment is layered only for parameter names / javadocs.
+    mappings(loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${property("parchment_version")}@zip")
+    })
 
-    tasks.withType<JavaCompile> {
-        options.encoding = "UTF-8"
-        options.release.set(17)
+    modImplementation("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
+    modApi("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
+
+    modApi("me.shedaniel.cloth:cloth-config-fabric:${property("cloth_config_version")}")
+    include("me.shedaniel.cloth:cloth-config-fabric:${property("cloth_config_version")}")
+
+    modImplementation("maven.modrinth:sodium:${property("sodium_version")}") {
+        exclude(group = "net.fabricmc.fabric-api")
+    }
+    modImplementation("maven.modrinth:iris:${property("iris_version")}") {
+        exclude(group = "net.fabricmc.fabric-api")
     }
 
-    extensions.getByType<JavaPluginExtension>().apply {
-        withSourcesJar()
-    }
+    // Flywheel moved to dev.engine-room.flywheel (old com.jozufozu.flywheel is dead).
+    modImplementation("dev.engine-room.flywheel:flywheel-fabric-${property("minecraft_version")}:${property("flywheel_version")}")
 
+    implementation("org.anarres:jcpp:1.4.14") { isTransitive = false } // for iris
+    implementation("io.github.douira:glsl-transformer:2.0.0-pre13") // for iris
+    implementation("org.antlr:antlr4-runtime:4.11.1") // for iris
+
+    modImplementation("maven.modrinth:modmenu:${property("mod_menu_version")}")
+
+    implementation("com.github.LlamaLad7:MixinExtras:0.1.1")
+    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
+    implementation("org.jetbrains:annotations:24.0.1")
+}
+
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+    options.release.set(17)
+}
+
+java {
+    withSourcesJar()
+}
+
+tasks.processResources {
+    inputs.property("version", project.version)
+    filesMatching("fabric.mod.json") {
+        expand("versions" to project.version)
+    }
 }

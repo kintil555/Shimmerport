@@ -33,15 +33,6 @@ on:
         description: "publish curseforge"
         type: boolean
         default: true
-      forge:
-        description: "forge"
-        type: boolean
-        default: true
-      fabric:
-        description: "fabric"
-        type: boolean
-        default: true
-
 
 jobs:
   call-build-workflow:
@@ -57,26 +48,26 @@ jobs:
       MAVEN_PASS: ${{ secrets.MAVEN_PASS }}
       MAVEN_USER: ${{ secrets.MAVEN_USER }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Download shimmer artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         continue-on-error: true
         with:
           name: Shimmer
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
         with:
-          java-version: '17'
+          java-version: '25'
           distribution: 'temurin'
       - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/actions/wrapper-validation@v6
       - name: Grant execute permission for gradle
         run: chmod +x gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
       - name: Publish to Maven
-        uses: gradle/gradle-build-action@v2.4.2
-        with:
-          arguments: publish
-    
+        run: ./gradlew publish
+
   publish:
     needs: call-build-workflow
     runs-on: ubuntu-latest
@@ -84,13 +75,12 @@ jobs:
       contents: write
     strategy:
       matrix:
-        loader: [ Forge, Fabric ]
         website: [ modrinth, curseforge, github_release ]
-    name: ${{ matrix.website }} (${{ matrix.loader }})
+    name: ${{ matrix.website }}
 
     steps:
       - name: Download shimmer artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         continue-on-error: true
         with:
           name: Shimmer
@@ -99,34 +89,22 @@ jobs:
         id: shimmer_env
         continue-on-error: true
         run: |
-          export loader=${{ matrix.loader }}
-          export name=$(ls ${loader}/build/libs/ | grep shadow -v | grep sources -v | awk -F.jar '{print $1}')
-          export mod_name=$(echo $name | awk -F- '{print $1}')
-          export loader_name=$(echo $name | awk -F- '{print $2}')
-          export mc_version=$(echo $name | awk -F- '{print $3}')
-          export mod_version=$(echo $name | awk -F- '{print $4}')
-          export full_version=$(echo ${mc_version}-${mod_version})
+          export name=$(ls build/libs/ | grep -v sources | grep -v dev | awk -F.jar '{print $1}' | head -n1)
+          export mc_version="${{ github.event.inputs.release-type }}"
           echo "name=$name" >> $GITHUB_OUTPUT
-          echo "mod_name=$mod_name" >> $GITHUB_OUTPUT
-          echo "loader_name=$loader_name" >> $GITHUB_OUTPUT
-          echo "mc_version=$mc_version" >> $GITHUB_OUTPUT
-          echo "mod_version=$mod_version" >> $GITHUB_OUTPUT
-          echo "full_version=$full_version" >> $GITHUB_OUTPUT
-          rm ${loader}/build/libs/*shadow.jar
 
       - name: Publish Github Release
         uses: Kir-Antipov/mc-publish@v3.3
         continue-on-error: true
-        if: (matrix.website == 'github_release' && inputs.github-release) && ((matrix.loader == 'Forge' && inputs.forge) || (matrix.loader == 'Fabric' && inputs.fabric))
+        if: matrix.website == 'github_release' && inputs.github-release
         with:
           files: |
-            ${{ matrix.loader }}/build/libs/!(*-@(dev|sources|javadoc)).jar
-            ${{ matrix.loader }}/build/libs/*-@(dev|sources|javadocs).jar
-          name : ${{ steps.shimmer_env.outputs.name }}
-          version : ${{ steps.shimmer_env.outputs.full_version }}
+            build/libs/!(*-@(dev|sources|javadoc)).jar
+            build/libs/*-@(dev|sources|javadocs).jar
+          name: ${{ steps.shimmer_env.outputs.name }}
           version-type: ${{ inputs.release-type }}
           changelog: ${{ inputs.changelog }}
-          java : Java 18
+          java: Java 25
 
           github-token: ${{ secrets.GITHUB_TOKEN }}
           github-generate-changelog: true
@@ -134,16 +112,15 @@ jobs:
       - name: Publish Modrinth Release
         uses: Kir-Antipov/mc-publish@v3.3
         continue-on-error: true
-        if : (matrix.website == 'modrinth' && inputs.modrinth) && ((matrix.loader == 'Forge' && inputs.forge) || (matrix.loader == 'Fabric' && inputs.fabric))
+        if: matrix.website == 'modrinth' && inputs.modrinth
         with:
           files: |
-            ${{ matrix.loader }}/build/libs/!(*-@(dev|sources|javadoc)).jar
-            ${{ matrix.loader }}/build/libs/*-@(dev|sources|javadocs).jar
+            build/libs/!(*-@(dev|sources|javadoc)).jar
+            build/libs/*-@(dev|sources|javadocs).jar
           name: ${{ steps.shimmer_env.outputs.name }}
-          version: ${{ steps.shimmer_env.outputs.full_version }}
           version-type: ${{ inputs.release-type }}
           changelog: ${{ inputs.changelog }}
-          java: Java 18
+          java: Java 25
 
           modrinth-id: uBKACKpl
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
@@ -151,16 +128,15 @@ jobs:
       - name: Publish Curseforge Release
         uses: Kir-Antipov/mc-publish@v3.3
         continue-on-error: true
-        if: (matrix.website == 'curseforge' && inputs.curseforge) && ((matrix.loader == 'Forge' && inputs.forge) || (matrix.loader == 'Fabric' && inputs.fabric))
+        if: matrix.website == 'curseforge' && inputs.curseforge
         with:
           files: |
-            ${{ matrix.loader }}/build/libs/!(*-@(dev|sources|javadoc)).jar
-            ${{ matrix.loader }}/build/libs/*-@(dev|sources|javadocs).jar
+            build/libs/!(*-@(dev|sources|javadoc)).jar
+            build/libs/*-@(dev|sources|javadocs).jar
           name: ${{ steps.shimmer_env.outputs.name }}
-          version: ${{ steps.shimmer_env.outputs.full_version }}
           version-type: ${{ inputs.release-type }}
           changelog: ${{ inputs.changelog }}
-          java: Java 18
+          java: Java 25
 
           curseforge-id: 627824
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
