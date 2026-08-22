@@ -12,9 +12,6 @@ base {
 }
 
 repositories {
-    maven("https://maven.parchmentmc.org/") {
-        content { includeGroup("org.parchmentmc.data") }
-    }
     maven("https://api.modrinth.com/maven") {
         name = "Modrinth"
         content { includeGroup("maven.modrinth") }
@@ -36,12 +33,9 @@ loom {
 
 dependencies {
     minecraft("com.mojang:minecraft:${property("minecraft_version")}")
-    // 26.2 is unobfuscated: Mojang mappings need no remapping layer.
-    // Parchment is layered only for parameter names / javadocs.
-    mappings(loom.layered {
-        officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-${property("parchment_version")}@zip")
-    })
+    // 26.2 is unobfuscated: no mappings dependency is declared at all (per FabricMC/fabric-example-mod@26.2).
+    // Declaring officialMojangMappings()/parchment() here is what causes
+    // "Failed to find official mojang mappings for 26.2" — Loom expects nothing in this block.
 
     modImplementation("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
     modApi("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
@@ -72,11 +66,13 @@ dependencies {
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(17)
+    options.release.set(25)
 }
 
 java {
     withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 tasks.processResources {
