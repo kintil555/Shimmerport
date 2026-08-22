@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom") version "1.17-SNAPSHOT"
+    id("net.fabricmc.fabric-loom") version "1.17-SNAPSHOT"
     `java-library`
     `maven-publish`
 }
@@ -16,7 +16,6 @@ repositories {
         name = "Modrinth"
         content { includeGroup("maven.modrinth") }
     }
-    maven("https://maven.createmod.net/") { name = "createmod" } // Flywheel
     maven("https://jitpack.io")
 }
 
@@ -37,27 +36,24 @@ dependencies {
     // Declaring officialMojangMappings()/parchment() here is what causes
     // "Failed to find official mojang mappings for 26.2" — Loom expects nothing in this block.
 
-    modImplementation("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
-    modApi("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
+    implementation("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
+    api("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
 
-    modApi("me.shedaniel.cloth:cloth-config-fabric:${property("cloth_config_version")}")
+    api("me.shedaniel.cloth:cloth-config-fabric:${property("cloth_config_version")}")
     include("me.shedaniel.cloth:cloth-config-fabric:${property("cloth_config_version")}")
 
-    modImplementation("maven.modrinth:sodium:${property("sodium_version")}") {
+    implementation("maven.modrinth:sodium:${property("sodium_version")}") {
         exclude(group = "net.fabricmc.fabric-api")
     }
-    modImplementation("maven.modrinth:iris:${property("iris_version")}") {
+    implementation("maven.modrinth:iris:${property("iris_version")}") {
         exclude(group = "net.fabricmc.fabric-api")
     }
-
-    // Flywheel moved to dev.engine-room.flywheel (old com.jozufozu.flywheel is dead).
-    modImplementation("dev.engine-room.flywheel:flywheel-fabric-${property("minecraft_version")}:${property("flywheel_version")}")
 
     implementation("org.anarres:jcpp:1.4.14") { isTransitive = false } // for iris
     implementation("io.github.douira:glsl-transformer:2.0.0-pre13") // for iris
     implementation("org.antlr:antlr4-runtime:4.11.1") // for iris
 
-    modImplementation("maven.modrinth:modmenu:${property("mod_menu_version")}")
+    implementation("maven.modrinth:modmenu:${property("mod_menu_version")}")
 
     implementation("com.github.LlamaLad7:MixinExtras:0.1.1")
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
